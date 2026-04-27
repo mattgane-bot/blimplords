@@ -1,0 +1,1683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLIMPLORDS — A Sky-Tyrants' Deck-Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Cinzel:wght@600;800&family=Special+Elite&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --charcoal: #0e0e10;
+  --fog: #2a2a2e;
+  --soot: #1a1a1d;
+  --bone: #cfc7b2;
+  --bone-dim: #8a8474;
+  --brass: #b08d4c;
+  --brass-dim: #6e5828;
+  --oxblood: #7a1a1a;
+  --oxblood-bright: #b62828;
+  --rivet: #463a23;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--charcoal);
+  color: var(--bone);
+  font-family: 'Oswald', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body {
+  background:
+    radial-gradient(ellipse at 20% 0%, #1a1a1f 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, #1f1815 0%, transparent 55%),
+    var(--charcoal);
+  background-attachment: fixed;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.78 0 0 0 0 0.7 0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: .35;
+  mix-blend-mode: overlay;
+  z-index: 1000;
+}
+
+h1, h2, h3 { font-family: 'Cinzel', serif; letter-spacing: .15em; margin: 0; text-transform: uppercase; }
+h1 { font-weight: 800; }
+
+button {
+  font-family: 'Cinzel', serif;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #2c241a 0%, #18130c 100%);
+  color: var(--bone);
+  border: 1px solid var(--brass-dim);
+  padding: .8em 1.6em;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px #0008,
+    inset 0 1px 0 #b08d4c33,
+    0 2px 0 #0009,
+    0 0 12px #0006;
+  transition: color .15s, border-color .15s, transform .05s;
+}
+button::before, button::after {
+  content: ''; position: absolute; width: 5px; height: 5px;
+  background: radial-gradient(circle, #d8b76a 0%, #5a4516 70%, #000 100%);
+  border-radius: 50%;
+  top: 4px;
+}
+button::before { left: 6px; }
+button::after  { right: 6px; }
+button:hover:not(:disabled) {
+  color: var(--oxblood-bright);
+  border-color: var(--oxblood-bright);
+  text-shadow: 0 0 8px #b6282880;
+}
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { color: #555; border-color: #2a2418; cursor: not-allowed; opacity: .6; }
+
+/* ------ screen system ------ */
+section.screen {
+  display: none;
+  position: relative;
+  z-index: 2;
+}
+section.screen.active { display: block; }
+
+/* ============ TITLE ============ */
+#title {
+  min-height: 100vh;
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+#title.active { display: flex; }
+.title-frame {
+  border: 1px solid var(--brass-dim);
+  padding: 4rem 5rem;
+  position: relative;
+  background: linear-gradient(180deg, #14110b 0%, #0a0907 100%);
+  box-shadow: inset 0 0 80px #000c, 0 0 60px #0008;
+}
+.title-frame::before, .title-frame::after {
+  content: ''; position: absolute; left: 12px; right: 12px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--brass) 20%, var(--brass) 80%, transparent);
+}
+.title-frame::before { top: 12px; }
+.title-frame::after  { bottom: 12px; }
+.title-eyebrow {
+  font-family: 'Special Elite', monospace;
+  letter-spacing: .5em;
+  font-size: .75rem;
+  color: var(--brass);
+  margin-bottom: 1rem;
+}
+.title-main {
+  font-family: 'UnifrakturCook', serif;
+  font-size: clamp(3.5rem, 11vw, 8rem);
+  line-height: 1;
+  color: var(--bone);
+  text-shadow:
+    0 0 20px #b08d4c40,
+    2px 2px 0 #000,
+    4px 4px 12px #000a;
+  margin-bottom: .25rem;
+}
+.title-main .lord-i {
+  color: var(--oxblood-bright);
+  text-shadow: 0 0 24px #b6282880, 2px 2px 0 #000;
+}
+.title-sub {
+  font-family: 'Cinzel', serif;
+  letter-spacing: .35em;
+  font-size: .9rem;
+  color: var(--bone-dim);
+  margin-bottom: 2.5rem;
+}
+.title-flavor {
+  font-family: 'Special Elite', monospace;
+  font-size: .9rem;
+  color: var(--bone-dim);
+  max-width: 520px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
+}
+.title-flavor em { color: var(--oxblood-bright); font-style: normal; }
+.title-cta { font-size: 1rem; padding: 1.1em 2.4em; }
+.title-foot {
+  margin-top: 2rem;
+  font-family: 'Special Elite', monospace;
+  font-size: .7rem;
+  letter-spacing: .3em;
+  color: var(--bone-dim);
+  opacity: .6;
+}
+
+/* ============ DRYDOCK / DECK BUILDER ============ */
+#drydock { padding: 2rem 2.5rem 4rem; max-width: 1500px; margin: 0 auto; }
+.dock-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  border-bottom: 1px solid var(--brass-dim);
+  padding-bottom: 1rem; margin-bottom: 1.75rem;
+}
+.dock-title {
+  font-family: 'Cinzel', serif; font-size: 1.9rem; letter-spacing: .2em;
+}
+.dock-title .accent { color: var(--brass); }
+.dock-sub {
+  font-family: 'Special Elite', monospace; font-size: .8rem;
+  color: var(--bone-dim); letter-spacing: .25em; text-transform: uppercase;
+  margin-top: .3rem;
+}
+.dock-meta { font-family: 'Special Elite', monospace; font-size: .75rem; color: var(--bone-dim); text-align: right; line-height: 1.6; }
+.dock-meta .bigcount { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--bone); display: block; }
+
+.dock-grid {
+  display: grid; grid-template-columns: 1.6fr 1fr; gap: 2rem;
+}
+.panel {
+  background: linear-gradient(180deg, #14110b 0%, #0a0907 100%);
+  border: 1px solid var(--rivet);
+  padding: 1.25rem;
+  position: relative;
+  box-shadow: inset 0 0 40px #000a;
+}
+.panel::before, .panel::after,
+.panel > .rivet-tl, .panel > .rivet-tr, .panel > .rivet-bl, .panel > .rivet-br {
+  content: ''; position: absolute; width: 6px; height: 6px;
+  background: radial-gradient(circle, #d8b76a 0%, #5a4516 70%, #000 100%);
+  border-radius: 50%;
+}
+.panel::before { top: 6px; left: 6px; }
+.panel::after  { top: 6px; right: 6px; }
+.panel > .rivet-bl { bottom: 6px; left: 6px; }
+.panel > .rivet-br { bottom: 6px; right: 6px; }
+
+.panel-head {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: 'Cinzel', serif; letter-spacing: .2em; font-size: .9rem;
+  color: var(--brass);
+  border-bottom: 1px solid var(--rivet);
+  padding: .25rem 0 .8rem; margin-bottom: 1rem;
+}
+
+.filters { display: flex; gap: .5rem; flex-wrap: wrap; }
+.chip {
+  font-family: 'Special Elite', monospace;
+  font-size: .7rem; letter-spacing: .15em;
+  background: transparent;
+  border: 1px solid var(--rivet);
+  color: var(--bone-dim);
+  padding: .35em .8em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.chip:hover { color: var(--bone); border-color: var(--brass); }
+.chip.on { color: var(--charcoal); background: var(--brass); border-color: var(--brass); }
+.chip::before, .chip::after { display: none; }
+
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .9rem; }
+
+/* CARD */
+.card {
+  background: linear-gradient(180deg, #1c1814 0%, #0d0b08 100%);
+  border: 1px solid var(--brass-dim);
+  padding: .55rem .55rem .5rem;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  display: flex; flex-direction: column;
+  min-height: 180px;
+  transition: transform .12s, border-color .12s, box-shadow .12s;
+  box-shadow: inset 0 0 24px #000a, 0 2px 4px #0008;
+}
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--oxblood-bright);
+  box-shadow: inset 0 0 24px #000a, 0 6px 18px #b6282844;
+  z-index: 5;
+}
+.card.selected, .card.maxed { opacity: .55; }
+.card .name {
+  font-family: 'Cinzel', serif; font-size: .82rem; letter-spacing: .08em;
+  color: var(--bone); text-transform: uppercase;
+  margin: 0 0 .35rem; padding-right: 28px;
+  line-height: 1.15;
+}
+.card .cost {
+  position: absolute; top: -10px; left: -10px;
+  width: 32px; height: 32px;
+  background: radial-gradient(circle at 35% 30%, #d8b76a 0%, #8a6a26 60%, #2a1f08 100%);
+  border: 1.5px solid #1a1308;
+  border-radius: 50%;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.05rem;
+  color: #1a1308;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px #b08d4c33, inset 0 -3px 6px #0006, 0 3px 5px #000a;
+  z-index: 3;
+}
+.card .typeline {
+  font-family: 'Special Elite', monospace;
+  font-size: .6rem; letter-spacing: .2em;
+  color: var(--brass); text-transform: uppercase;
+  margin-bottom: .35rem;
+}
+.card .art {
+  flex: 1;
+  background:
+    linear-gradient(180deg, #2a2218 0%, #14100a 100%);
+  border: 1px solid var(--rivet);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem;
+  color: var(--bone-dim);
+  margin-bottom: .35rem;
+  min-height: 60px;
+  filter: grayscale(.5) contrast(1.1);
+  position: relative;
+  overflow: hidden;
+}
+.card .art::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, #0000 60%, #0009 100%);
+  pointer-events: none;
+}
+.card.crew .art { background: linear-gradient(180deg, #2a1818 0%, #100808 100%); }
+.card.blimp .art { background: linear-gradient(180deg, #1c2a2a 0%, #08100f 100%); }
+.card.order .art { background: linear-gradient(180deg, #2a2410 0%, #100c04 100%); }
+.card .text {
+  font-family: 'Special Elite', monospace;
+  font-size: .65rem;
+  line-height: 1.35;
+  color: var(--bone-dim);
+  min-height: 2.4em;
+}
+.card .stats {
+  display: flex; justify-content: space-between;
+  position: absolute; bottom: -10px; left: -8px; right: -8px;
+  pointer-events: none;
+}
+.stat-pip {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--oxblood-bright) 0%, var(--oxblood) 60%, #2a0808 100%);
+  border: 1.5px solid #1a0808;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: .9rem;
+  color: var(--bone);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px #7a1a1a44, inset 0 -2px 4px #0008, 0 2px 4px #000a;
+}
+.stat-pip.hull {
+  background: radial-gradient(circle at 35% 30%, #d8b76a 0%, #8a6a26 60%, #2a1f08 100%);
+  color: #1a1308;
+  box-shadow: 0 0 0 2px #b08d4c33, inset 0 -2px 4px #0006, 0 2px 4px #000a;
+}
+
+/* DECK PANEL */
+.deck-list {
+  display: flex; flex-direction: column;
+  gap: .25rem;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: .35rem;
+  margin-bottom: 1rem;
+}
+.deck-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto auto;
+  gap: .6rem;
+  align-items: center;
+  font-family: 'Special Elite', monospace; font-size: .75rem;
+  padding: .25rem .4rem;
+  border-bottom: 1px solid #1a1610;
+  color: var(--bone);
+}
+.deck-row:hover { background: #1a140a; }
+.deck-row .row-cost {
+  width: 22px; height: 22px; font-size: .8rem;
+  background: radial-gradient(circle at 35% 30%, #d8b76a 0%, #8a6a26 60%, #2a1f08 100%);
+  border: 1px solid #1a1308; border-radius: 50%;
+  color: #1a1308; font-family: 'Cinzel', serif; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.deck-row .row-name { letter-spacing: .05em; }
+.deck-row .row-name.t-crew { color: #e0a8a8; }
+.deck-row .row-name.t-blimp { color: #a8d0d0; }
+.deck-row .row-name.t-order { color: #d8c084; }
+.deck-row .row-qty { color: var(--brass); font-weight: 700; }
+.deck-row .row-rm {
+  background: transparent; border: none; color: var(--bone-dim);
+  cursor: pointer; font-size: 1rem; padding: 0 .2rem;
+  font-family: 'Special Elite', monospace;
+}
+.deck-row .row-rm:hover { color: var(--oxblood-bright); }
+.deck-row .row-rm::before, .deck-row .row-rm::after { display: none; }
+
+.curve {
+  display: grid; grid-template-columns: repeat(11, 1fr);
+  gap: 3px;
+  height: 70px;
+  align-items: end;
+  border-bottom: 1px solid var(--rivet);
+  padding-bottom: 4px;
+  margin-bottom: .3rem;
+}
+.curve-bar {
+  background: linear-gradient(180deg, var(--brass) 0%, var(--brass-dim) 100%);
+  min-height: 2px;
+  position: relative;
+}
+.curve-bar.empty { background: #1a140a; }
+.curve-labels { display: grid; grid-template-columns: repeat(11, 1fr); gap: 3px; font-family: 'Special Elite', monospace; font-size: .6rem; color: var(--bone-dim); text-align: center; margin-bottom: 1rem; }
+
+.launch-row { display: flex; gap: .75rem; }
+.launch-row button { flex: 1; }
+.btn-launch { font-size: 1rem; padding: 1.1em 1.4em; }
+
+/* empty state */
+.empty {
+  font-family: 'Special Elite', monospace;
+  color: var(--bone-dim);
+  text-align: center;
+  padding: 1.5rem .5rem;
+  font-size: .8rem;
+  letter-spacing: .1em;
+}
+
+/* ============ BATTLE ============ */
+#battle { min-height: 100vh; display: none; flex-direction: column; padding: 1rem 1.5rem 1rem; gap: .8rem; max-width: 1500px; margin: 0 auto; }
+#battle.active { display: flex; }
+
+.battle-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 30% 20%, #2a1810 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, #18222a 0%, transparent 55%);
+}
+.battle-bg::after {
+  content: '';
+  position: absolute; inset: -10%;
+  background:
+    radial-gradient(ellipse 600px 100px at 30% 30%, #cfc7b211 0%, transparent 70%),
+    radial-gradient(ellipse 500px 80px at 70% 60%, #cfc7b209 0%, transparent 70%);
+  filter: blur(14px);
+  animation: drift 30s linear infinite;
+}
+@keyframes drift {
+  0%   { transform: translateX(-3%); }
+  50%  { transform: translateX(3%); }
+  100% { transform: translateX(-3%); }
+}
+
+.zone {
+  position: relative;
+  border: 1px solid var(--rivet);
+  background: linear-gradient(180deg, #14110b 0%, #0a0907 100%);
+  padding: .8rem 1rem;
+  box-shadow: inset 0 0 30px #000a;
+}
+.zone.opp { border-color: #4a1818; }
+.zone.you { border-color: var(--brass-dim); }
+
+.bz-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'Cinzel', serif; font-size: .8rem; letter-spacing: .25em;
+  color: var(--brass); margin-bottom: .5rem; text-transform: uppercase;
+}
+.bz-head .opp-tag { color: var(--oxblood-bright); }
+
+.battlefield-row {
+  display: grid; grid-template-columns: 220px 1fr 200px;
+  gap: 1rem; align-items: stretch;
+}
+
+.blimp-portrait {
+  position: relative;
+  border: 1px solid var(--rivet);
+  background: linear-gradient(180deg, #1a1610 0%, #08070a 100%);
+  padding: .6rem;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 130px;
+  text-align: center;
+}
+.blimp-portrait .name {
+  font-family: 'Cinzel', serif; font-size: .75rem; letter-spacing: .15em;
+  color: var(--bone); margin-bottom: .35rem;
+}
+.blimp-portrait .name .lord { color: var(--oxblood-bright); }
+.blimp-portrait .silhouette {
+  font-size: 3.4rem; line-height: 1; margin: .15rem 0 .35rem;
+  filter: grayscale(.7) contrast(1.2);
+  text-shadow: 0 0 20px #0008, 0 4px 10px #0008;
+}
+.blimp-portrait .hull {
+  display: flex; align-items: center; gap: .35rem;
+  font-family: 'Cinzel', serif; font-weight: 800;
+  color: var(--oxblood-bright);
+  font-size: 1.4rem;
+}
+.blimp-portrait .hull .label {
+  font-family: 'Special Elite', monospace;
+  font-size: .6rem; letter-spacing: .2em;
+  color: var(--bone-dim); text-transform: uppercase;
+}
+.blimp-portrait .pressure-row {
+  display: flex; gap: 3px; margin-top: .4rem; flex-wrap: wrap; justify-content: center;
+}
+.pressure-pip {
+  width: 11px; height: 11px;
+  background: radial-gradient(circle, #2a1f08 0%, #0a0804 100%);
+  border: 1px solid var(--brass-dim);
+  border-radius: 50%;
+}
+.pressure-pip.full { background: radial-gradient(circle, #d8b76a 0%, #8a6a26 60%, #2a1f08 100%); border-color: #d8b76a; box-shadow: 0 0 4px #b08d4c80; }
+.pressure-pip.spent { background: radial-gradient(circle, #463a23 0%, #1a1308 100%); }
+.blimp-portrait.target { cursor: crosshair; }
+.blimp-portrait.target:hover, .blimp-portrait.target.aim { border-color: var(--oxblood-bright); box-shadow: 0 0 16px #b6282880, inset 0 0 30px #00000099; }
+
+.crew-row {
+  display: flex; gap: .5rem; align-items: center;
+  padding: .5rem;
+  border: 1px dashed var(--rivet);
+  background: #00000033;
+  min-height: 130px; overflow-x: auto;
+}
+.crew-row.empty-row::before {
+  content: 'No crew aloft.';
+  font-family: 'Special Elite', monospace; color: var(--bone-dim);
+  font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
+  width: 100%; text-align: center;
+}
+
+/* mini card on board */
+.mini {
+  width: 88px; min-height: 110px;
+  background: linear-gradient(180deg, #1c1814 0%, #0d0b08 100%);
+  border: 1px solid var(--brass-dim);
+  padding: .35rem;
+  position: relative;
+  display: flex; flex-direction: column;
+  cursor: pointer;
+  font-size: .65rem;
+  flex-shrink: 0;
+}
+.mini.crew { border-color: #6e2828; }
+.mini.blimp { border-color: #2a6e6e; }
+.mini.exhausted { opacity: .55; filter: grayscale(.6); }
+.mini.summoning { box-shadow: 0 0 0 1px #b08d4c44 inset; opacity: .85; }
+.mini.attacker { border-color: var(--oxblood-bright); box-shadow: 0 0 16px #b6282880; transform: translateY(-3px); }
+.mini.target-able { box-shadow: 0 0 0 1px var(--oxblood-bright) inset, 0 0 12px #b6282844; }
+.mini .nm {
+  font-family: 'Cinzel', serif; font-size: .65rem;
+  color: var(--bone); text-transform: uppercase;
+  text-align: center; line-height: 1.1;
+  margin-bottom: .2rem;
+}
+.mini .glyph {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; color: var(--bone-dim);
+  filter: grayscale(.6);
+}
+.mini .ministats {
+  display: flex; justify-content: space-between;
+  position: absolute; bottom: -8px; left: -6px; right: -6px;
+}
+.mini .pip {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--oxblood-bright) 0%, var(--oxblood) 60%, #2a0808 100%);
+  border: 1.5px solid #1a0808;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: .75rem;
+  color: var(--bone);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 1.5px #7a1a1a44, inset 0 -1px 3px #0008;
+}
+.mini .pip.hp { background: radial-gradient(circle at 35% 30%, #d8b76a 0%, #8a6a26 60%, #2a1f08 100%); color: #1a1308; box-shadow: 0 0 0 1.5px #b08d4c33, inset 0 -1px 3px #0006; }
+
+/* hand */
+.hand-zone {
+  display: flex; gap: .6rem; justify-content: center; flex-wrap: nowrap; overflow-x: auto;
+  padding: 1rem .5rem 1.2rem;
+  min-height: 220px;
+}
+.hand-card {
+  width: 140px; min-height: 200px;
+  background: linear-gradient(180deg, #1c1814 0%, #0d0b08 100%);
+  border: 1px solid var(--brass-dim);
+  padding: .5rem;
+  position: relative;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  flex-shrink: 0;
+  transition: transform .15s, border-color .15s, box-shadow .15s, margin-top .15s;
+  box-shadow: inset 0 0 24px #000a, 0 4px 6px #0008;
+}
+.hand-card:hover { transform: translateY(-12px) rotate(0deg); border-color: var(--oxblood-bright); box-shadow: inset 0 0 24px #000a, 0 12px 24px #b6282844; z-index: 6; }
+.hand-card.unaffordable { opacity: .45; cursor: not-allowed; }
+.hand-card.unaffordable:hover { transform: none; border-color: var(--brass-dim); box-shadow: inset 0 0 24px #000a, 0 4px 6px #0008; }
+.hand-card .nm { font-family: 'Cinzel', serif; font-size: .72rem; color: var(--bone); text-transform: uppercase; letter-spacing: .06em; padding-right: 26px; line-height: 1.15; min-height: 2.2em; }
+.hand-card .typeline { font-family: 'Special Elite', monospace; font-size: .55rem; letter-spacing: .2em; color: var(--brass); text-transform: uppercase; margin: .25rem 0 .35rem; }
+.hand-card .art {
+  flex: 1; min-height: 50px;
+  background: linear-gradient(180deg, #2a2218 0%, #14100a 100%);
+  border: 1px solid var(--rivet);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; color: var(--bone-dim);
+  margin-bottom: .35rem; filter: grayscale(.6);
+}
+.hand-card.crew .art { background: linear-gradient(180deg, #2a1818 0%, #100808 100%); }
+.hand-card.blimp .art { background: linear-gradient(180deg, #1c2a2a 0%, #08100f 100%); }
+.hand-card.order .art { background: linear-gradient(180deg, #2a2410 0%, #100c04 100%); }
+.hand-card .tx { font-family: 'Special Elite', monospace; font-size: .58rem; line-height: 1.3; color: var(--bone-dim); min-height: 2.4em; }
+.hand-card .cost { position: absolute; top: -10px; left: -10px; width: 30px; height: 30px;
+  background: radial-gradient(circle at 35% 30%, #d8b76a 0%, #8a6a26 60%, #2a1f08 100%);
+  border: 1.5px solid #1a1308; border-radius: 50%;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 1rem;
+  color: #1a1308;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px #b08d4c33, inset 0 -3px 6px #0006, 0 3px 5px #000a;
+}
+.hand-card .stats { display: flex; justify-content: space-between; position: absolute; bottom: -10px; left: -7px; right: -7px; }
+
+/* opponent face-down hand */
+.opp-hand {
+  display: flex; gap: 6px; justify-content: center;
+  padding: .4rem;
+}
+.opp-hand .card-back {
+  width: 52px; height: 76px;
+  background:
+    linear-gradient(135deg, #1a1308 25%, transparent 25%) -8px 0,
+    linear-gradient(225deg, #1a1308 25%, transparent 25%) -8px 0,
+    linear-gradient(180deg, #2c241a 0%, #18130c 100%);
+  background-size: 16px 16px;
+  border: 1px solid var(--brass-dim);
+  position: relative;
+  box-shadow: inset 0 0 12px #000a;
+}
+.opp-hand .card-back::after {
+  content: '☠';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--brass-dim); font-size: 1.4rem;
+  text-shadow: 0 0 6px #000;
+}
+
+/* permanents (blimp parts attached) */
+.perm-row {
+  display: flex; gap: .35rem; justify-content: flex-start; flex-wrap: wrap;
+  margin-top: .4rem;
+}
+.perm {
+  font-family: 'Special Elite', monospace;
+  font-size: .6rem; letter-spacing: .12em;
+  color: var(--bone-dim);
+  border: 1px solid var(--rivet);
+  background: #08100f;
+  padding: .15em .5em;
+  text-transform: uppercase;
+}
+.perm::before { content: '⚙ '; color: var(--brass); }
+
+/* log */
+.log {
+  background: #08070a;
+  border: 1px solid var(--rivet);
+  padding: .5rem .7rem;
+  font-family: 'Special Elite', monospace;
+  font-size: .7rem;
+  color: var(--bone-dim);
+  max-height: 130px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+.log p { margin: 0 0 .15rem; }
+.log p .who-you { color: var(--brass); }
+.log p .who-opp { color: var(--oxblood-bright); }
+.log p.system { color: #6a6055; font-style: italic; }
+
+.battle-controls {
+  display: flex; gap: 1rem; justify-content: space-between; align-items: center;
+}
+.turn-indicator {
+  font-family: 'Cinzel', serif;
+  letter-spacing: .25em;
+  font-size: .9rem;
+  color: var(--bone);
+  text-transform: uppercase;
+}
+.turn-indicator .who { color: var(--brass); }
+.turn-indicator.opp .who { color: var(--oxblood-bright); }
+
+.you-bar {
+  display: flex; gap: 1.2rem; align-items: center;
+  font-family: 'Special Elite', monospace; font-size: .75rem; color: var(--bone-dim);
+  letter-spacing: .15em; text-transform: uppercase;
+}
+.you-bar strong { color: var(--bone); font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.1rem; }
+
+/* victory overlay */
+.veil {
+  position: fixed; inset: 0; z-index: 50;
+  background: radial-gradient(ellipse at center, #1a0a0acc 0%, #000d 70%);
+  display: none; align-items: center; justify-content: center;
+  text-align: center;
+  backdrop-filter: blur(2px);
+}
+.veil.show { display: flex; }
+.veil-frame {
+  border: 1px solid var(--brass);
+  background: linear-gradient(180deg, #14110b 0%, #0a0907 100%);
+  padding: 3rem 4rem;
+  box-shadow: inset 0 0 60px #000c, 0 0 60px #b6282844;
+}
+.veil h2 {
+  font-family: 'UnifrakturCook', serif;
+  font-size: 4rem;
+  color: var(--bone);
+  margin-bottom: .5rem;
+}
+.veil h2.lose { color: var(--oxblood-bright); }
+.veil .epitaph {
+  font-family: 'Special Elite', monospace;
+  font-size: .9rem;
+  color: var(--bone-dim);
+  max-width: 380px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.6;
+}
+
+/* aim banner */
+.aim-banner {
+  position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+  z-index: 30;
+  font-family: 'Cinzel', serif; letter-spacing: .25em; font-size: .8rem;
+  background: #b62828; color: #fff;
+  padding: .55em 1.5em;
+  border: 1px solid #1a0808;
+  text-transform: uppercase;
+  display: none;
+  box-shadow: 0 0 24px #b62828aa;
+}
+.aim-banner.show { display: block; }
+
+/* small screens */
+@media (max-width: 1100px) {
+  .dock-grid { grid-template-columns: 1fr; }
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+  .battlefield-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .card-grid { grid-template-columns: 1fr; }
+  #drydock { padding: 1rem; }
+  .title-frame { padding: 2rem 1.5rem; }
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0a0907; }
+::-webkit-scrollbar-thumb { background: var(--rivet); border: 1px solid #000; }
+::-webkit-scrollbar-thumb:hover { background: var(--brass-dim); }
+</style>
+</head>
+<body>
+
+<!-- TITLE -->
+<section id="title" class="screen active">
+  <div class="title-frame">
+    <div class="title-eyebrow">An Aetheric Concern</div>
+    <h1 class="title-main">B<span class="lord-i">l</span>impl<span class="lord-i">o</span>rds</h1>
+    <div class="title-sub">— A Sky-Tyrants' Deck-Builder —</div>
+    <p class="title-flavor">
+      The grounders choke in the smog. Above the clouds, the <em>Blimplords</em>
+      drift in gilded gondolas, drinking aether-wine and trading in indentures.
+      Forge your fleet. Press your crew. <em>Burn rival barons from the sky.</em>
+    </p>
+    <button id="btn-start" class="title-cta">Forge Your Fleet</button>
+    <div class="title-foot">Vol. I &nbsp;·&nbsp; Drydock Edition &nbsp;·&nbsp; Schematic 0.1</div>
+  </div>
+</section>
+
+<!-- DRYDOCK / DECK BUILDER -->
+<section id="drydock" class="screen">
+  <div class="dock-header">
+    <div>
+      <div class="dock-title">B<span class="accent">L</span>IMPLORDS &nbsp;·&nbsp; <span class="accent">DRYDOCK</span></div>
+      <div class="dock-sub">Forge your fleet — 20 cards, no more, no less</div>
+    </div>
+    <div class="dock-meta">
+      <span class="bigcount" id="dock-count">0 / 20</span>
+      Pressure curve below.<br>Max 2 copies of any card.
+    </div>
+  </div>
+  <div class="dock-grid">
+    <div class="panel">
+      <span class="rivet-bl"></span><span class="rivet-br"></span>
+      <div class="panel-head">
+        <span>Card Pool</span>
+        <div class="filters" id="filters">
+          <button class="chip on" data-f="all">All</button>
+          <button class="chip" data-f="crew">Crew</button>
+          <button class="chip" data-f="blimp">Blimp</button>
+          <button class="chip" data-f="order">Orders</button>
+        </div>
+      </div>
+      <div class="card-grid" id="pool"></div>
+    </div>
+    <div class="panel">
+      <span class="rivet-bl"></span><span class="rivet-br"></span>
+      <div class="panel-head"><span>Manifest</span><span id="dock-curve-label">Pressure Curve</span></div>
+      <div class="curve" id="curve"></div>
+      <div class="curve-labels">
+        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10+</span>
+      </div>
+      <div class="deck-list" id="deck-list">
+        <div class="empty">Drydock empty. Recruit crew, bolt on plating, draft your orders.</div>
+      </div>
+      <div class="launch-row">
+        <button id="btn-quickfill">Quick Fill</button>
+        <button id="btn-launch" class="btn-launch" disabled>Launch ▲</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BATTLE -->
+<section id="battle" class="screen">
+  <div class="battle-bg"></div>
+
+  <div class="zone opp">
+    <div class="bz-head">
+      <span><span class="opp-tag">Lord Vexley Crowne</span> &nbsp;·&nbsp; H.M.S. <span class="opp-tag" id="opp-shipname">Brass Vulture</span></span>
+      <span id="opp-handcount">Hand: 3</span>
+    </div>
+    <div class="battlefield-row">
+      <div class="blimp-portrait target" id="opp-blimp" data-target="opp-face">
+        <div class="name">H.M.S. <span class="lord">BRASS VULTURE</span></div>
+        <div class="silhouette">🛩</div>
+        <div class="hull"><span class="label">Hull</span><span id="opp-hp">30</span></div>
+        <div class="pressure-row" id="opp-pressure"></div>
+        <div class="perm-row" id="opp-perms"></div>
+      </div>
+      <div class="crew-row" id="opp-crew"></div>
+      <div class="opp-hand" id="opp-hand"></div>
+    </div>
+  </div>
+
+  <div class="log" id="log"></div>
+
+  <div class="zone you">
+    <div class="bz-head">
+      <span>You &nbsp;·&nbsp; H.M.S. <span style="color:var(--brass)">Iron Magpie</span></span>
+      <span id="you-deckcount">Deck: 14</span>
+    </div>
+    <div class="battlefield-row">
+      <div class="blimp-portrait target" id="you-blimp" data-target="you-face">
+        <div class="name">H.M.S. <span class="lord" style="color:var(--brass)">IRON MAGPIE</span></div>
+        <div class="silhouette">🛸</div>
+        <div class="hull"><span class="label">Hull</span><span id="you-hp" style="color:var(--brass)">30</span></div>
+        <div class="pressure-row" id="you-pressure"></div>
+        <div class="perm-row" id="you-perms"></div>
+      </div>
+      <div class="crew-row" id="you-crew"></div>
+      <div style="display:flex; flex-direction:column; gap:.4rem; justify-content:center;">
+        <div style="font-family:'Special Elite',monospace; font-size:.7rem; letter-spacing:.2em; color:var(--bone-dim); text-transform:uppercase;">Pressure</div>
+        <div style="font-family:'Cinzel',serif; font-weight:800; font-size:1.6rem; color:var(--brass);">
+          <span id="you-pressure-num">1</span> / <span id="you-pressure-max">1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hand-zone" id="you-hand"></div>
+
+  <div class="battle-controls">
+    <div class="you-bar">
+      Hand: <strong id="you-handcount">0</strong> &nbsp;·&nbsp; Deck: <strong id="you-deck">0</strong> &nbsp;·&nbsp; Discard: <strong id="you-disc">0</strong>
+    </div>
+    <div class="turn-indicator" id="turn-indicator"><span class="who">Your</span> Turn — <span id="turn-num">1</span></div>
+    <div style="display:flex; gap:.5rem;">
+      <button id="btn-cancel" style="display:none;">Cancel Aim</button>
+      <button id="btn-end">End Turn ▾</button>
+    </div>
+  </div>
+</section>
+
+<div class="aim-banner" id="aim-banner">Choose a target — click an enemy crew or the rival blimp. ESC to cancel.</div>
+
+<div class="veil" id="veil">
+  <div class="veil-frame">
+    <h2 id="veil-title">Victory</h2>
+    <div class="epitaph" id="veil-epitaph"></div>
+    <button id="btn-again">Return to Drydock</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ============================================================
+//   CARD POOL
+// ============================================================
+const CARDS = [
+  // CREW
+  { id: 'stoker',        name: 'Bilge Stoker',        type: 'crew',  cost: 1, atk: 1, hp: 2, glyph: '🔧', art: 'blimplords-art/bilge.png',  text: 'Cheap conscript. Smells of coal-tar.' },
+  { id: 'gunner',        name: 'Deck Gunner',         type: 'crew',  cost: 2, atk: 2, hp: 3, glyph: '🔫', art: 'blimplords-art/gunner.png', text: 'Steady aim, steadier morale.' },
+  { id: 'aristocrat',    name: 'Powdered Aristocrat', type: 'crew',  cost: 2, atk: 1, hp: 1, glyph: '🎩', text: 'On play: Draw a card. (Knows people.)' },
+  { id: 'brawler',       name: 'Bilge Brawler',       type: 'crew',  cost: 3, atk: 3, hp: 3, glyph: '🥊', text: 'Knuckle-dusters. No questions.' },
+  { id: 'saboteur',      name: 'Aether Saboteur',     type: 'crew',  cost: 3, atk: 2, hp: 4, glyph: '💣', text: 'On play: 1 damage to enemy blimp.' },
+  { id: 'captain',       name: 'Iron Captain',        type: 'crew',  cost: 4, atk: 4, hp: 5, glyph: '🎖', text: 'Hard-eyed and pitiless.' },
+  // BLIMP PARTS (permanents)
+  { id: 'hull',          name: 'Riveted Hull',        type: 'blimp', cost: 2, glyph: '🛡', text: 'Permanent. +5 max Hull.' },
+  { id: 'turbines',      name: 'Twin Turbines',       type: 'blimp', cost: 3, glyph: '🌀', text: 'Permanent. Draw +1 each turn.' },
+  { id: 'flak',          name: 'Flak Battery',        type: 'blimp', cost: 4, glyph: '✸',  text: 'Permanent. End of turn: 1 dmg to all enemy crew.' },
+  { id: 'smog',          name: 'Smog Vents',          type: 'blimp', cost: 2, glyph: '☁',  text: 'Permanent. Enemy crew −1 atk while in play.' },
+  // ORDERS
+  { id: 'broadcast',     name: 'Propaganda Broadcast',type: 'order', cost: 1, glyph: '📢', text: 'Draw 2 cards.' },
+  { id: 'boarding',      name: 'Boarding Party',      type: 'order', cost: 2, glyph: '⚔', text: 'Deal 2 damage to an enemy crew.' },
+  { id: 'bombing',       name: 'Bombing Run',         type: 'order', cost: 3, glyph: '💥', text: 'Deal 4 damage to enemy blimp.' },
+  { id: 'surge',         name: 'Aether Surge',        type: 'order', cost: 4, glyph: '⚡', text: 'Your crew get +2/+0 until end of turn.' },
+  { id: 'mutiny',        name: 'Pressed Conscripts',  type: 'order', cost: 5, glyph: '⛓', text: 'Summon two 2/2 Pressed Hands.' },
+];
+const CARD_BY_ID = Object.fromEntries(CARDS.map(c => [c.id, c]));
+
+const TYPELINE = { crew: 'Crew', blimp: 'Blimp Module', order: 'Order' };
+
+// Inline style + inner content for card art panels. If a card has a real
+// painted image (`art`), use it as a sepia-pulled background; otherwise
+// fall back to the glyph emoji.
+function artStyle(c) {
+  if (!c || !c.art) return '';
+  return ` style="background-image:url('${c.art}'); background-size:cover; background-position:center top; filter:contrast(1.06) saturate(.85) brightness(.92);"`;
+}
+function artInner(c) {
+  if (c && c.art) return '';
+  if (c && c.glyph) return c.glyph;
+  return '⛓';
+}
+
+// ============================================================
+//   STATE — DRYDOCK
+// ============================================================
+let view = 'title';
+let deck = []; // ids
+let filter = 'all';
+
+// ============================================================
+//   DRYDOCK RENDER
+// ============================================================
+function renderPool() {
+  const pool = document.getElementById('pool');
+  pool.innerHTML = '';
+  CARDS
+    .filter(c => filter === 'all' || c.type === filter)
+    .forEach(c => {
+      const count = deck.filter(id => id === c.id).length;
+      const maxed = count >= 2;
+      const el = document.createElement('div');
+      el.className = `card ${c.type}` + (maxed ? ' maxed' : '');
+      el.innerHTML = `
+        <div class="cost">${c.cost}</div>
+        <div class="name">${c.name}</div>
+        <div class="typeline">${TYPELINE[c.type]}${count ? ' · in deck ×' + count : ''}</div>
+        <div class="art"${artStyle(c)}>${artInner(c)}</div>
+        <div class="text">${c.text}</div>
+        ${c.type === 'crew' ? `
+          <div class="stats">
+            <div class="stat-pip">${c.atk}</div>
+            <div class="stat-pip hull">${c.hp}</div>
+          </div>` : ''}
+      `;
+      el.onclick = () => {
+        if (deck.length >= 20) return;
+        if (deck.filter(id => id === c.id).length >= 2) return;
+        deck.push(c.id);
+        renderDock();
+      };
+      pool.appendChild(el);
+    });
+}
+
+function renderDeck() {
+  const list = document.getElementById('deck-list');
+  if (!deck.length) {
+    list.innerHTML = '<div class="empty">Drydock empty. Recruit crew, bolt on plating, draft your orders.</div>';
+    return;
+  }
+  // group by id
+  const counts = {};
+  deck.forEach(id => counts[id] = (counts[id] || 0) + 1);
+  // sort by cost then name
+  const ids = Object.keys(counts).sort((a, b) => {
+    const A = CARD_BY_ID[a], B = CARD_BY_ID[b];
+    return (A.cost - B.cost) || A.name.localeCompare(B.name);
+  });
+  list.innerHTML = ids.map(id => {
+    const c = CARD_BY_ID[id];
+    return `<div class="deck-row">
+      <div class="row-cost">${c.cost}</div>
+      <div class="row-name t-${c.type}">${c.name}</div>
+      <div class="row-qty">×${counts[id]}</div>
+      <button class="row-rm" data-id="${id}" title="Remove one">✕</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.row-rm').forEach(b => {
+    b.onclick = () => {
+      const idx = deck.lastIndexOf(b.dataset.id);
+      if (idx >= 0) { deck.splice(idx, 1); renderDock(); }
+    };
+  });
+}
+
+function renderCurve() {
+  const buckets = new Array(11).fill(0);
+  deck.forEach(id => {
+    const c = CARD_BY_ID[id];
+    const slot = Math.min(c.cost, 10);
+    buckets[slot]++;
+  });
+  const max = Math.max(1, ...buckets);
+  const curve = document.getElementById('curve');
+  curve.innerHTML = buckets.map(n =>
+    `<div class="curve-bar ${n === 0 ? 'empty' : ''}" style="height:${(n / max) * 100}%" title="${n}"></div>`
+  ).join('');
+}
+
+function renderDock() {
+  document.getElementById('dock-count').textContent = `${deck.length} / 20`;
+  document.getElementById('btn-launch').disabled = deck.length !== 20;
+  renderPool();
+  renderDeck();
+  renderCurve();
+}
+
+document.getElementById('filters').onclick = (e) => {
+  if (!e.target.dataset.f) return;
+  filter = e.target.dataset.f;
+  document.querySelectorAll('#filters .chip').forEach(c => c.classList.toggle('on', c.dataset.f === filter));
+  renderPool();
+};
+
+document.getElementById('btn-quickfill').onclick = () => {
+  // a thematic "starter" deck for quick demo
+  const starter = [
+    'stoker','stoker','gunner','gunner','aristocrat','aristocrat',
+    'brawler','brawler','saboteur','captain',
+    'hull','hull','turbines','smog',
+    'broadcast','broadcast','boarding','boarding','bombing','surge'
+  ];
+  deck = starter.slice(0, 20);
+  renderDock();
+};
+
+document.getElementById('btn-start').onclick = () => show('drydock');
+document.getElementById('btn-launch').onclick = () => startBattle();
+
+function show(name) {
+  view = name;
+  ['title','drydock','battle'].forEach(s => {
+    document.getElementById(s).classList.toggle('active', s === name);
+  });
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+//   BATTLE STATE
+// ============================================================
+let game = null;
+
+function fresh(side) {
+  return {
+    side, // 'you' | 'opp'
+    name: side === 'you' ? 'Iron Magpie' : 'Brass Vulture',
+    hp: 30, maxHp: 30,
+    pressure: 0, maxPressure: 0,
+    deck: [], hand: [], discard: [],
+    crew: [],   // {uid, cardId, atk, hp, summoning, hasAttacked, buffs:{atk:0}}
+    perms: [],  // {uid, cardId}
+    extraDraw: 0,
+  };
+}
+
+let nextUid = 1;
+function uid() { return nextUid++; }
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function makeOppDeck() {
+  // a curated foe deck — slightly different flavour
+  return [
+    'stoker','stoker','gunner','gunner','brawler','brawler',
+    'saboteur','saboteur','captain',
+    'hull','flak','turbines',
+    'boarding','boarding','bombing','bombing','broadcast','surge','mutiny','aristocrat',
+  ];
+}
+
+function startBattle() {
+  const you = fresh('you');
+  const opp = fresh('opp');
+  you.deck = shuffle(deck.slice());
+  opp.deck = shuffle(makeOppDeck());
+
+  game = {
+    you, opp,
+    turn: 1, active: 'you',
+    aim: null, // {cardUid} when player crew is selected to attack
+    pendingTarget: null, // for orders that need a target
+    over: false,
+    log: [],
+  };
+
+  for (let i = 0; i < 3; i++) draw(you);
+  for (let i = 0; i < 3; i++) draw(opp);
+
+  beginTurn(you);
+  show('battle');
+  pushLog('system', `The bell tolls. Lord Vexley sneers from his gondola.`);
+  renderBattle();
+}
+
+function pushLog(who, text) {
+  game.log.push({ who, text });
+  if (game.log.length > 30) game.log.shift();
+}
+
+function draw(p) {
+  if (p.deck.length === 0) {
+    if (p.discard.length === 0) {
+      // fatigue: lose 1
+      p.hp -= 1;
+      pushLog('system', `${p.side === 'you' ? 'Your' : 'Lord Vexley\'s'} hold runs dry — fatigue claws their hull (1 dmg).`);
+      return;
+    }
+    p.deck = shuffle(p.discard);
+    p.discard = [];
+  }
+  const id = p.deck.shift();
+  if (p.hand.length < 10) p.hand.push({ uid: uid(), cardId: id });
+  else p.discard.push(id); // burn
+}
+
+function beginTurn(p) {
+  p.maxPressure = Math.min(10, p.maxPressure + 1);
+  p.pressure = p.maxPressure;
+  // refresh crew
+  p.crew.forEach(m => { m.summoning = false; m.hasAttacked = false; m.buffs = { atk: 0 }; });
+  // turbines effect
+  const draws = 1 + p.extraDraw;
+  for (let i = 0; i < draws; i++) draw(p);
+}
+
+function endTurnEffects(p, foe) {
+  // flak battery: 1 dmg to all enemy crew
+  if (p.perms.some(x => x.cardId === 'flak')) {
+    let any = false;
+    foe.crew.forEach(m => { m.hp -= 1; any = true; });
+    if (any) pushLog(p.side, `Flak Battery rakes the rival crew.`);
+    foe.crew = foe.crew.filter(m => m.hp > 0);
+  }
+  // strip Aether Surge buffs (already cleared at next beginTurn for the player who used it, but explicit)
+}
+
+// ============================================================
+//   BATTLE — ACTIONS
+// ============================================================
+function canPlay(p, hcard) {
+  return CARD_BY_ID[hcard.cardId].cost <= p.pressure;
+}
+
+function playCard(p, foe, hcard, opts = {}) {
+  const card = CARD_BY_ID[hcard.cardId];
+  p.pressure -= card.cost;
+  // remove from hand
+  p.hand = p.hand.filter(h => h.uid !== hcard.uid);
+  p.discard.push(card.id);
+
+  if (card.type === 'crew') {
+    const effAtk = card.atk + (p.perms.some(x => x.cardId === 'smog') && false ? 0 : 0);
+    const baseAtk = card.atk;
+    p.crew.push({
+      uid: uid(),
+      cardId: card.id,
+      atk: baseAtk,
+      hp: card.hp,
+      maxHp: card.hp,
+      summoning: true,
+      hasAttacked: false,
+      buffs: { atk: 0 },
+    });
+    pushLog(p.side, `<em>${card.name}</em> reports aboard ${whoseLower(p)} blimp.`);
+    // on-play
+    if (card.id === 'aristocrat') {
+      draw(p);
+      pushLog(p.side, `A favour passes hands — ${whoseLower(p)} hand grows.`);
+    }
+    if (card.id === 'saboteur') {
+      foe.hp -= 1;
+      pushLog(p.side, `<em>Aether Saboteur</em> torches a gas-cell — 1 dmg.`);
+    }
+  } else if (card.type === 'blimp') {
+    p.perms.push({ uid: uid(), cardId: card.id });
+    if (card.id === 'hull') { p.maxHp += 5; p.hp += 5; }
+    if (card.id === 'turbines') { p.extraDraw += 1; }
+    pushLog(p.side, `${whose(p)} crew bolts on <em>${card.name}</em>.`);
+  } else if (card.type === 'order') {
+    if (card.id === 'broadcast') {
+      draw(p); draw(p);
+      pushLog(p.side, `${whose(p)} propagandists blare — two new orders fly in.`);
+    }
+    if (card.id === 'bombing') {
+      foe.hp -= 4;
+      pushLog(p.side, `${whose(p)} bombardiers drop a <em>Bombing Run</em> — 4 dmg.`);
+    }
+    if (card.id === 'boarding') {
+      // pick a target (player picks; AI picks random)
+      const target = opts.target;
+      if (target) {
+        target.hp -= 2;
+        pushLog(p.side, `${whose(p)} marines board a foe — 2 dmg to crew.`);
+        foe.crew = foe.crew.filter(m => m.hp > 0);
+      }
+    }
+    if (card.id === 'surge') {
+      p.crew.forEach(m => { m.buffs.atk += 2; });
+      pushLog(p.side, `<em>Aether Surge</em> lights ${whoseLower(p)} crew's eyes (+2 atk).`);
+    }
+    if (card.id === 'mutiny') {
+      for (let i = 0; i < 2; i++) {
+        p.crew.push({
+          uid: uid(), cardId: 'pressed', atk: 2, hp: 2, maxHp: 2,
+          summoning: true, hasAttacked: false, buffs: { atk: 0 },
+        });
+      }
+      pushLog(p.side, `${whose(p)} press-gang drags two conscripts aboard.`);
+    }
+  }
+
+  // smog effect re-apply
+  applyAuras(p, foe);
+  applyAuras(foe, p);
+
+  checkWin();
+}
+
+function who(p) {
+  return p.side === 'you'
+    ? '<span class="who-you">You</span>'
+    : '<span class="who-opp">Lord Vexley</span>';
+}
+function whose(p) {
+  return p.side === 'you'
+    ? '<span class="who-you">Your</span>'
+    : '<span class="who-opp">Lord Vexley\'s</span>';
+}
+function whoseLower(p) {
+  return p.side === 'you'
+    ? '<span class="who-you">your</span>'
+    : '<span class="who-opp">Lord Vexley\'s</span>';
+}
+
+function applyAuras(p, foe) {
+  // Smog Vents: enemy crew -1 atk (min 0). Implemented as buff.atk = -1 from foe perm; clean and reapply.
+  // Use a derived value: m.atk + m.buffs.atk + (smog from foe ? -1 : 0). Simpler: store a 'smogPenalty' on each crew.
+  const smog = foe.perms.some(x => x.cardId === 'smog');
+  p.crew.forEach(m => { m.smog = smog ? -1 : 0; });
+}
+
+function effAtk(m) {
+  return Math.max(0, m.atk + (m.buffs?.atk || 0) + (m.smog || 0));
+}
+
+function declareAttack(attacker, target, p, foe) {
+  if (attacker.summoning || attacker.hasAttacked) return;
+  attacker.hasAttacked = true;
+  const ea = effAtk(attacker);
+  if (target === 'face') {
+    foe.hp -= ea;
+    pushLog(p.side, `${whose(p)} <em>${cardName(attacker)}</em> strikes the rival hull (${ea} dmg).`);
+  } else {
+    // crew vs crew
+    target.hp -= ea;
+    attacker.hp -= effAtk(target);
+    pushLog(p.side, `<em>${cardName(attacker)}</em> trades blows with <em>${cardName(target)}</em>.`);
+    foe.crew = foe.crew.filter(m => m.hp > 0);
+  }
+  p.crew = p.crew.filter(m => m.hp > 0);
+  checkWin();
+}
+
+function cardName(m) {
+  if (m.cardId === 'pressed') return 'Pressed Hand';
+  return CARD_BY_ID[m.cardId].name;
+}
+
+function checkWin() {
+  if (game.over) return;
+  if (game.opp.hp <= 0) endGame('win');
+  else if (game.you.hp <= 0) endGame('lose');
+}
+
+function endGame(result) {
+  game.over = true;
+  const veil = document.getElementById('veil');
+  const t = document.getElementById('veil-title');
+  const e = document.getElementById('veil-epitaph');
+  if (result === 'win') {
+    t.className = '';
+    t.textContent = 'Victory';
+    e.innerHTML = '<em>Brass Vulture</em> tips, falters, and falls. The grounders cheer; the smog reclaims the wreck.';
+  } else {
+    t.className = 'lose';
+    t.textContent = 'Defeat';
+    e.innerHTML = 'Your gas-cells rupture. Lord Vexley toasts the fall. Your name is struck from the Aether Register.';
+  }
+  veil.classList.add('show');
+  renderBattle();
+}
+
+document.getElementById('btn-again').onclick = () => {
+  document.getElementById('veil').classList.remove('show');
+  show('drydock');
+};
+
+// ============================================================
+//   END TURN / AI
+// ============================================================
+document.getElementById('btn-end').onclick = endTurn;
+
+function endTurn() {
+  if (game.over) return;
+  if (game.active !== 'you') return;
+  cancelAim();
+  endTurnEffects(game.you, game.opp);
+  // expire 1-turn buffs
+  game.you.crew.forEach(m => { m.buffs.atk = 0; });
+  game.active = 'opp';
+  renderBattle();
+  setTimeout(aiTurn, 700);
+}
+
+function aiTurn() {
+  if (game.over) return;
+  beginTurn(game.opp);
+  pushLog('system', `Lord Vexley draws ire and orders.`);
+  renderBattle();
+
+  const steps = [];
+  // Plan: play affordable cards in ascending cost, greedy
+  function planPlays() {
+    let played = true;
+    while (played) {
+      played = false;
+      const playable = game.opp.hand
+        .map(h => ({ h, c: CARD_BY_ID[h.cardId] }))
+        .filter(x => x.c.cost <= game.opp.pressure)
+        .sort((a, b) => a.c.cost - b.c.cost);
+      for (const { h, c } of playable) {
+        if (c.cost > game.opp.pressure) continue;
+        // pick targets
+        if (c.id === 'boarding') {
+          const target = game.you.crew.slice().sort((a, b) => b.hp - a.hp)[0];
+          if (!target) continue; // skip if no target
+          steps.push(() => playCard(game.opp, game.you, h, { target }));
+        } else {
+          steps.push(() => playCard(game.opp, game.you, h));
+        }
+        // simulate cost so loop can continue
+        game.opp._simCost = (game.opp._simCost || 0) + c.cost;
+        // we need to actually execute to update pressure for the next planning iteration
+        // simpler: just execute now
+        if (c.id === 'boarding') {
+          const target = game.you.crew.slice().sort((a, b) => b.hp - a.hp)[0];
+          if (!target) { steps.pop(); continue; }
+          // remove the queued one and push the same direct exec
+        }
+        // execute right now to update state for next iteration
+        steps.pop();
+        if (c.id === 'boarding') {
+          const target = game.you.crew.slice().sort((a, b) => b.hp - a.hp)[0];
+          playCard(game.opp, game.you, h, { target });
+        } else {
+          playCard(game.opp, game.you, h);
+        }
+        played = true;
+        break;
+      }
+    }
+  }
+
+  // Stagger plays for visibility
+  let delay = 0;
+  const beforeHand = game.opp.hand.slice();
+  // Run plays loop, but we want animations between — collect intended plays first by simulating
+  const intended = [];
+  const sim = {
+    pressure: game.opp.pressure,
+    hand: game.opp.hand.slice(),
+  };
+  let progress = true;
+  while (progress) {
+    progress = false;
+    sim.hand
+      .map(h => ({ h, c: CARD_BY_ID[h.cardId] }))
+      .filter(x => x.c.cost <= sim.pressure)
+      .sort((a, b) => a.c.cost - b.c.cost)
+      .some(({ h, c }) => {
+        if (c.id === 'boarding' && game.you.crew.length === 0) return false;
+        intended.push(h.uid);
+        sim.pressure -= c.cost;
+        sim.hand = sim.hand.filter(x => x.uid !== h.uid);
+        progress = true;
+        return true;
+      });
+  }
+
+  function step() {
+    if (game.over) { renderBattle(); return; }
+    if (intended.length === 0) {
+      // Now do attacks
+      attackPhase();
+      return;
+    }
+    const targetUid = intended.shift();
+    const h = game.opp.hand.find(x => x.uid === targetUid);
+    if (!h) { step(); return; }
+    const c = CARD_BY_ID[h.cardId];
+    if (c.cost > game.opp.pressure) { step(); return; }
+    if (c.id === 'boarding') {
+      const target = game.you.crew.slice().sort((a, b) => b.hp - a.hp)[0];
+      if (!target) { step(); return; }
+      playCard(game.opp, game.you, h, { target });
+    } else {
+      playCard(game.opp, game.you, h);
+    }
+    renderBattle();
+    setTimeout(step, 650);
+  }
+
+  function attackPhase() {
+    if (game.over) { renderBattle(); return; }
+    const attackers = game.opp.crew.filter(m => !m.summoning && !m.hasAttacked && effAtk(m) > 0);
+    if (attackers.length === 0) {
+      finishOppTurn();
+      return;
+    }
+    const a = attackers[0];
+    // if no enemy crew, hit face. Otherwise: if enemy crew exists, AI prioritises killing weakest crew it can; else face.
+    let target = 'face';
+    if (game.you.crew.length > 0) {
+      // smarter: trade if can kill without dying, else go face
+      const myAtk = effAtk(a);
+      const killable = game.you.crew
+        .filter(m => m.hp <= myAtk)
+        .sort((m1, m2) => effAtk(m2) - effAtk(m1))[0];
+      if (killable && effAtk(killable) < a.hp) target = killable;
+      else if (game.you.crew.length >= 2) target = game.you.crew.slice().sort((m1, m2) => effAtk(m2) - effAtk(m1))[0];
+      else target = 'face';
+    }
+    declareAttack(a, target, game.opp, game.you);
+    renderBattle();
+    setTimeout(attackPhase, 600);
+  }
+
+  function finishOppTurn() {
+    if (game.over) { renderBattle(); return; }
+    endTurnEffects(game.opp, game.you);
+    game.opp.crew.forEach(m => { m.buffs.atk = 0; });
+    game.active = 'you';
+    game.turn += 1;
+    beginTurn(game.you);
+    renderBattle();
+  }
+
+  setTimeout(step, 500);
+}
+
+// ============================================================
+//   AIM / TARGETING (player)
+// ============================================================
+function startAim(crewUid) {
+  const m = game.you.crew.find(x => x.uid === crewUid);
+  if (!m) return;
+  if (m.summoning) { pushLog('system', 'That crew is still mustering — they cannot attack this turn.'); renderBattle(); return; }
+  if (m.hasAttacked) { pushLog('system', 'That crew has already swung this turn.'); renderBattle(); return; }
+  if (effAtk(m) <= 0) { pushLog('system', 'That crew has no fight in them right now.'); renderBattle(); return; }
+  game.aim = { crewUid };
+  document.getElementById('aim-banner').classList.add('show');
+  document.getElementById('btn-cancel').style.display = '';
+  renderBattle();
+}
+
+function cancelAim() {
+  game.aim = null;
+  game.pendingOrder = null;
+  document.getElementById('aim-banner').classList.remove('show');
+  document.getElementById('btn-cancel').style.display = 'none';
+}
+
+document.getElementById('btn-cancel').onclick = () => { cancelAim(); renderBattle(); };
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && (game?.aim || game?.pendingOrder)) { cancelAim(); renderBattle(); }
+});
+
+function clickEnemyCrew(crewUid) {
+  if (game.aim) {
+    const me = game.you.crew.find(x => x.uid === game.aim.crewUid);
+    const tgt = game.opp.crew.find(x => x.uid === crewUid);
+    if (!me || !tgt) return;
+    declareAttack(me, tgt, game.you, game.opp);
+    cancelAim();
+    renderBattle();
+    return;
+  }
+  if (game.pendingOrder) {
+    const ord = game.pendingOrder;
+    const tgt = game.opp.crew.find(x => x.uid === crewUid);
+    if (!tgt) return;
+    playCard(game.you, game.opp, ord.hcard, { target: tgt });
+    game.pendingOrder = null;
+    cancelAim();
+    renderBattle();
+  }
+}
+
+function clickEnemyFace() {
+  if (game.aim) {
+    const me = game.you.crew.find(x => x.uid === game.aim.crewUid);
+    if (!me) return;
+    declareAttack(me, 'face', game.you, game.opp);
+    cancelAim();
+    renderBattle();
+  }
+}
+
+// ============================================================
+//   PLAYER plays card from hand
+// ============================================================
+function clickHandCard(handUid) {
+  if (game.active !== 'you' || game.over) return;
+  const h = game.you.hand.find(x => x.uid === handUid);
+  if (!h) return;
+  const c = CARD_BY_ID[h.cardId];
+  if (c.cost > game.you.pressure) {
+    pushLog('system', 'Not enough Pressure.');
+    renderBattle();
+    return;
+  }
+  if (c.id === 'boarding') {
+    if (game.opp.crew.length === 0) { pushLog('system', 'No enemy crew to board.'); renderBattle(); return; }
+    game.pendingOrder = { hcard: h };
+    document.getElementById('aim-banner').classList.add('show');
+    document.getElementById('btn-cancel').style.display = '';
+    renderBattle();
+    return;
+  }
+  playCard(game.you, game.opp, h);
+  renderBattle();
+}
+
+// ============================================================
+//   RENDER BATTLE
+// ============================================================
+function renderBattle() {
+  if (!game) return;
+  const { you, opp } = game;
+
+  // names / hp / pressure
+  document.getElementById('opp-hp').textContent = Math.max(0, opp.hp);
+  document.getElementById('you-hp').textContent = Math.max(0, you.hp);
+  document.getElementById('opp-handcount').textContent = `Hand: ${opp.hand.length}`;
+  document.getElementById('you-handcount').textContent = you.hand.length;
+  document.getElementById('you-deck').textContent = you.deck.length;
+  document.getElementById('you-disc').textContent = you.discard.length;
+  document.getElementById('you-deckcount').textContent = `Deck: ${you.deck.length}`;
+  document.getElementById('you-pressure-num').textContent = you.pressure;
+  document.getElementById('you-pressure-max').textContent = you.maxPressure;
+
+  // pressure pips
+  function pipRow(p) {
+    const out = [];
+    for (let i = 1; i <= 10; i++) {
+      let cls = 'pressure-pip';
+      if (i <= p.maxPressure) {
+        cls += i <= p.pressure ? ' full' : ' spent';
+      }
+      out.push(`<div class="${cls}"></div>`);
+    }
+    return out.join('');
+  }
+  document.getElementById('opp-pressure').innerHTML = pipRow(opp);
+  document.getElementById('you-pressure').innerHTML = pipRow(you);
+
+  // perms
+  function permRow(p) {
+    if (p.perms.length === 0) return '';
+    return p.perms.map(x => `<span class="perm">${CARD_BY_ID[x.cardId].name}</span>`).join('');
+  }
+  document.getElementById('opp-perms').innerHTML = permRow(opp);
+  document.getElementById('you-perms').innerHTML = permRow(you);
+
+  // opponent face-down hand
+  document.getElementById('opp-hand').innerHTML =
+    Array.from({ length: Math.min(opp.hand.length, 6) }, () => `<div class="card-back"></div>`).join('');
+
+  // crew rows
+  function renderCrewRow(p, isYou) {
+    const row = document.getElementById(isYou ? 'you-crew' : 'opp-crew');
+    row.classList.toggle('empty-row', p.crew.length === 0);
+    if (p.crew.length === 0) { row.innerHTML = ''; return; }
+    row.innerHTML = p.crew.map(m => {
+      const ea = effAtk(m);
+      const cardId = m.cardId === 'pressed' ? null : m.cardId;
+      const c = cardId ? CARD_BY_ID[cardId] : null;
+      const name = m.cardId === 'pressed' ? 'Pressed Hand' : c.name;
+      const cls = ['mini', 'crew'];
+      if (m.summoning && isYou) cls.push('summoning');
+      if (m.hasAttacked && isYou) cls.push('exhausted');
+      if (game.aim && isYou && game.aim.crewUid === m.uid) cls.push('attacker');
+      if (!isYou && game.aim) cls.push('target-able');
+      if (!isYou && game.pendingOrder) cls.push('target-able');
+      const glyphStyle = (c && c.art)
+        ? ` style="background-image:url('${c.art}'); background-size:cover; background-position:center top; filter:contrast(1.06) saturate(.85) brightness(.92); font-size:0;"`
+        : '';
+      const glyphInner = (c && c.art) ? '' : (c ? c.glyph : '⛓');
+      return `<div class="${cls.join(' ')}" data-uid="${m.uid}" data-side="${isYou ? 'you' : 'opp'}">
+        <div class="nm">${name}</div>
+        <div class="glyph"${glyphStyle}>${glyphInner}</div>
+        <div class="ministats">
+          <div class="pip">${ea}</div>
+          <div class="pip hp">${m.hp}</div>
+        </div>
+      </div>`;
+    }).join('');
+    row.querySelectorAll('.mini').forEach(el => {
+      const id = +el.dataset.uid;
+      const side = el.dataset.side;
+      el.onclick = () => {
+        if (game.over || game.active !== 'you') return;
+        if (side === 'you') startAim(id);
+        else clickEnemyCrew(id);
+      };
+    });
+  }
+  renderCrewRow(you, true);
+  renderCrewRow(opp, false);
+
+  // opp blimp click target
+  document.getElementById('opp-blimp').classList.toggle('aim', !!game.aim);
+  document.getElementById('opp-blimp').onclick = () => {
+    if (game.over || game.active !== 'you') return;
+    clickEnemyFace();
+  };
+
+  // hand
+  const hand = document.getElementById('you-hand');
+  hand.innerHTML = you.hand.map(h => {
+    const c = CARD_BY_ID[h.cardId];
+    const afford = c.cost <= you.pressure && game.active === 'you' && !game.over;
+    const cls = ['hand-card', c.type];
+    if (!afford) cls.push('unaffordable');
+    return `<div class="${cls.join(' ')}" data-uid="${h.uid}">
+      <div class="cost">${c.cost}</div>
+      <div class="nm">${c.name}</div>
+      <div class="typeline">${TYPELINE[c.type]}</div>
+      <div class="art"${artStyle(c)}>${artInner(c)}</div>
+      <div class="tx">${c.text}</div>
+      ${c.type === 'crew' ? `<div class="stats">
+        <div class="stat-pip">${c.atk}</div>
+        <div class="stat-pip hull">${c.hp}</div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+  hand.querySelectorAll('.hand-card').forEach(el => {
+    const id = +el.dataset.uid;
+    el.onclick = () => clickHandCard(id);
+  });
+
+  // turn indicator
+  const ind = document.getElementById('turn-indicator');
+  ind.classList.toggle('opp', game.active === 'opp');
+  ind.innerHTML = game.active === 'you'
+    ? `<span class="who">Your</span> Turn — <span id="turn-num">${game.turn}</span>`
+    : `<span class="who">Lord Vexley's</span> Turn — <span id="turn-num">${game.turn}</span>`;
+
+  // end-turn button
+  document.getElementById('btn-end').disabled = game.active !== 'you' || game.over;
+
+  // log
+  const logEl = document.getElementById('log');
+  logEl.innerHTML = game.log.slice(-8).map(l => {
+    const cls = l.who === 'system' ? 'system' : '';
+    return `<p class="${cls}">${l.text}</p>`;
+  }).join('');
+  logEl.scrollTop = logEl.scrollHeight;
+
+  // hand cap warning if needed could go here
+}
+
+// ============================================================
+//   INIT
+// ============================================================
+renderDock();
+show('title');
+</script>
+</body>
+</html>
