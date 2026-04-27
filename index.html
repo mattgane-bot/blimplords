@@ -145,9 +145,11 @@ section.screen.active { display: block; }
 
 .title-frame {
   border: 1px solid var(--brass-dim);
-  padding: 3rem 4.5rem 2.75rem;
+  padding: 2.4rem 4rem 2rem;
   position: relative;
   z-index: 3;
+  margin-top: -8vh;        /* lift frame upward to give fan room */
+  margin-bottom: 4vh;
   background: linear-gradient(180deg, #14110bee 0%, #0a0907ee 100%);
   backdrop-filter: blur(4px);
   box-shadow: inset 0 0 80px #000c, 0 0 60px #000a, 0 12px 40px #000c;
@@ -209,42 +211,59 @@ section.screen.active { display: block; }
 /* ============ TITLE — CARD FAN ============ */
 .title-fan {
   position: absolute;
-  bottom: -90px;
+  bottom: 30px;
   left: 50%;
-  width: 800px;
-  height: 320px;
-  margin-left: -400px;
+  width: 1200px;
+  height: 380px;
+  margin-left: -600px;
   z-index: 2;
-  perspective: 1400px;
+  perspective: 1500px;
   transform-style: preserve-3d;
   pointer-events: none;
   transition: transform .6s cubic-bezier(.2, .8, .25, 1);
+}
+/* Brass glow halo anchoring the fan */
+.title-fan::before {
+  content: '';
+  position: absolute;
+  left: 50%; bottom: -20px;
+  width: 1100px; height: 240px;
+  margin-left: -550px;
+  background: radial-gradient(ellipse at center, #b08d4c33 0%, #b6282822 35%, transparent 70%);
+  filter: blur(30px);
+  z-index: -1;
+  pointer-events: none;
+  animation: halo-pulse 6s ease-in-out infinite alternate;
+}
+@keyframes halo-pulse {
+  0%   { opacity: .55; transform: scale(1); }
+  100% { opacity: .9;  transform: scale(1.05); }
 }
 .t-slot {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 150px;
-  height: 220px;
-  margin-left: -75px;
+  width: 200px;
+  height: 290px;
+  margin-left: -100px;
   transform-origin: 50% 110%;
   transform: translate(var(--x), var(--y)) rotate(var(--r));
-  animation: deal .8s cubic-bezier(.2, .8, .25, 1) backwards;
-  animation-delay: calc(var(--i, 0) * 0.13s + 0.4s);
+  animation: deal .9s cubic-bezier(.2, .8, .25, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 0.14s + 0.4s);
   pointer-events: auto;
   cursor: default;
   transition: transform .35s cubic-bezier(.2, .8, .25, 1), z-index 0s .35s;
 }
 .t-slot:hover {
   z-index: 30;
-  transform: translate(var(--x), calc(var(--y) - 60px)) rotate(0deg) scale(1.12);
+  transform: translate(var(--x), calc(var(--y) - 80px)) rotate(0deg) scale(1.14);
   transition: transform .35s cubic-bezier(.2, .8, .25, 1), z-index 0s 0s;
 }
 @keyframes deal {
   0% {
     opacity: 0;
-    transform: translate(0, 380px) rotate(0deg) scale(.7);
-    filter: blur(8px);
+    transform: translate(0, 520px) rotate(0deg) scale(.65);
+    filter: blur(10px);
   }
   60% { filter: blur(0); }
   100% {
@@ -330,12 +349,25 @@ section.screen.active { display: block; }
   100% { left: 108%; }
 }
 
-@media (max-width: 900px) {
-  .title-fan { width: 600px; margin-left: -300px; height: 240px; bottom: -120px; }
-  .t-slot { width: 110px; height: 160px; margin-left: -55px; }
+@media (max-width: 1200px) {
+  .title-fan { width: 900px; margin-left: -450px; height: 320px; bottom: 10px; }
+  .t-slot { width: 160px; height: 230px; margin-left: -80px; }
+  .t-slot[style*="--i:0"] { --x: -340px !important; --y: 88px !important; }
+  .t-slot[style*="--i:1"] { --x: -170px !important; --y: 30px !important; }
+  .t-slot[style*="--i:3"] { --x: 170px !important;  --y: 30px !important; }
+  .t-slot[style*="--i:4"] { --x: 340px !important;  --y: 88px !important; }
 }
-@media (max-width: 600px) {
+@media (max-width: 900px) {
+  .title-fan { width: 700px; margin-left: -350px; height: 260px; bottom: -50px; }
+  .t-slot { width: 130px; height: 190px; margin-left: -65px; }
+  .t-slot[style*="--i:0"] { --x: -260px !important; --y: 70px !important; }
+  .t-slot[style*="--i:1"] { --x: -130px !important; --y: 22px !important; }
+  .t-slot[style*="--i:3"] { --x: 130px !important;  --y: 22px !important; }
+  .t-slot[style*="--i:4"] { --x: 260px !important;  --y: 70px !important; }
+}
+@media (max-width: 700px) {
   .title-fan { display: none; }
+  .title-frame { margin-top: 0; margin-bottom: 0; }
 }
 
 /* ============ DRYDOCK / DECK BUILDER ============ */
@@ -930,23 +962,23 @@ section.screen.active { display: block; }
 
   <!-- A hand of cards being dealt to the player at the title screen -->
   <div class="title-fan" id="title-fan">
-    <div class="t-slot" style="--i:0; --x:-300px; --y:54px; --r:-18deg;">
+    <div class="t-slot" style="--i:0; --x:-440px; --y:110px; --r:-22deg;">
       <div class="t-card-art" data-cost="1" data-name="Bilge Stoker"
            style="background-image:url('blimplords-art/bilge.png');"></div>
     </div>
-    <div class="t-slot" style="--i:1; --x:-150px; --y:14px; --r:-9deg;">
+    <div class="t-slot" style="--i:1; --x:-220px; --y:38px; --r:-11deg;">
       <div class="t-card-art" data-cost="2" data-name="Deck Gunner"
            style="background-image:url('blimplords-art/gunner.png');"></div>
     </div>
-    <div class="t-slot" style="--i:2; --x:0px; --y:0px; --r:0deg;">
+    <div class="t-slot" style="--i:2; --x:0px; --y:-10px; --r:0deg;">
       <div class="t-card-art" data-cost="3" data-name="Aether Saboteur"
            style="background-image:url('blimplords-art/saboteur.png');"></div>
     </div>
-    <div class="t-slot" style="--i:3; --x:150px; --y:14px; --r:9deg;">
+    <div class="t-slot" style="--i:3; --x:220px; --y:38px; --r:11deg;">
       <div class="t-card-art" data-cost="2" data-name="Powdered Aristocrat"
            style="background-image:url('blimplords-art/aristocrat.png');"></div>
     </div>
-    <div class="t-slot" style="--i:4; --x:300px; --y:54px; --r:18deg;">
+    <div class="t-slot" style="--i:4; --x:440px; --y:110px; --r:22deg;">
       <div class="t-card-art" data-cost="3" data-name="Bilge Brawler"
            style="background-image:url('blimplords-art/brawler.png');"></div>
     </div>
