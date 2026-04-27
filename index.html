@@ -150,6 +150,7 @@ section.screen.active { display: block; }
   z-index: 3;
   margin-top: -8vh;        /* lift frame upward to give fan room */
   margin-bottom: 4vh;
+  max-width: min(880px, calc(100vw - 24px));
   background: linear-gradient(180deg, #14110bee 0%, #0a0907ee 100%);
   backdrop-filter: blur(4px);
   box-shadow: inset 0 0 80px #000c, 0 0 60px #000a, 0 12px 40px #000c;
@@ -169,7 +170,7 @@ section.screen.active { display: block; }
 }
 .title-main {
   font-family: 'UnifrakturCook', serif;
-  font-size: clamp(3.5rem, 11vw, 8rem);
+  font-size: clamp(2.4rem, 10vw, 8rem);
   line-height: 1;
   color: var(--bone);
   text-shadow:
@@ -177,6 +178,7 @@ section.screen.active { display: block; }
     2px 2px 0 #000,
     4px 4px 12px #000a;
   margin-bottom: .25rem;
+  word-break: break-word;
 }
 .title-main .lord-i {
   color: var(--oxblood-bright);
@@ -196,6 +198,7 @@ section.screen.active { display: block; }
   max-width: 520px;
   margin: 0 auto 2.5rem;
   line-height: 1.6;
+  word-wrap: break-word;
 }
 .title-flavor em { color: var(--oxblood-bright); font-style: normal; }
 .title-cta { font-size: 1rem; padding: 1.1em 2.4em; }
@@ -366,8 +369,51 @@ section.screen.active { display: block; }
   .t-slot[style*="--i:4"] { --x: 260px !important;  --y: 70px !important; }
 }
 @media (max-width: 700px) {
-  .title-fan { display: none; }
-  .title-frame { margin-top: 0; margin-bottom: 0; }
+  /* Phone title: tight frame, small fan still visible at the bottom */
+  .title-frame {
+    margin-top: -2vh;
+    margin-bottom: 2vh;
+    padding: 1.4rem .9rem 1.2rem;
+  }
+  .title-main { font-size: clamp(1.7rem, 8vw, 3.4rem); letter-spacing: -.01em; }
+  .title-eyebrow { letter-spacing: .35em; font-size: .65rem; }
+  .title-sub { letter-spacing: .2em; font-size: .65rem; }
+  .title-flavor { font-size: .78rem; max-width: 100%; margin-bottom: 1.3rem; line-height: 1.55; }
+  .title-cta { font-size: .8rem; padding: .85em 1.4em; }
+  .title-foot { font-size: .55rem; letter-spacing: .2em; }
+
+  .title-fan {
+    width: 100%;
+    margin-left: -50%;
+    height: 200px;
+    bottom: 8px;
+  }
+  .t-slot {
+    width: 86px;
+    height: 124px;
+    margin-left: -43px;
+  }
+  .t-slot[style*="--i:0"] { --x: -150px !important; --y: 60px !important; --r: -22deg !important; }
+  .t-slot[style*="--i:1"] { --x:  -76px !important; --y: 22px !important; --r: -11deg !important; }
+  .t-slot[style*="--i:2"] { --x:    0px !important; --y:  0px !important; --r:   0deg !important; }
+  .t-slot[style*="--i:3"] { --x:   76px !important; --y: 22px !important; --r:  11deg !important; }
+  .t-slot[style*="--i:4"] { --x:  150px !important; --y: 60px !important; --r:  22deg !important; }
+  .t-slot:hover {
+    transform: translate(var(--x), calc(var(--y) - 40px)) rotate(0deg) scale(1.08);
+  }
+  .t-card-art::before {
+    width: 24px; height: 24px; font-size: .8rem;
+    top: -6px; left: -6px; border-width: 1px;
+  }
+  .title-fan::before { width: 360px; height: 160px; margin-left: -180px; }
+}
+@media (max-width: 380px) {
+  .title-fan { height: 180px; }
+  .t-slot { width: 74px; height: 108px; margin-left: -37px; }
+  .t-slot[style*="--i:0"] { --x: -126px !important; --y: 50px !important; }
+  .t-slot[style*="--i:1"] { --x:  -64px !important; --y: 18px !important; }
+  .t-slot[style*="--i:3"] { --x:   64px !important; --y: 18px !important; }
+  .t-slot[style*="--i:4"] { --x:  126px !important; --y: 50px !important; }
 }
 
 /* ============ DRYDOCK / DECK BUILDER ============ */
@@ -458,7 +504,7 @@ section.screen.active { display: block; }
 .card .name {
   font-family: 'Cinzel', serif; font-size: .82rem; letter-spacing: .08em;
   color: var(--bone); text-transform: uppercase;
-  margin: 0 0 .35rem; padding-right: 28px;
+  margin: 0 0 .35rem; padding-left: 28px;
   line-height: 1.15;
 }
 .card .cost {
@@ -771,7 +817,7 @@ section.screen.active { display: block; }
 .hand-card:hover { transform: translateY(-12px) rotate(0deg); border-color: var(--oxblood-bright); box-shadow: inset 0 0 24px #000a, 0 12px 24px #b6282844; z-index: 6; }
 .hand-card.unaffordable { opacity: .45; cursor: not-allowed; }
 .hand-card.unaffordable:hover { transform: none; border-color: var(--brass-dim); box-shadow: inset 0 0 24px #000a, 0 4px 6px #0008; }
-.hand-card .nm { font-family: 'Cinzel', serif; font-size: .72rem; color: var(--bone); text-transform: uppercase; letter-spacing: .06em; padding-right: 26px; line-height: 1.15; min-height: 2.2em; }
+.hand-card .nm { font-family: 'Cinzel', serif; font-size: .72rem; color: var(--bone); text-transform: uppercase; letter-spacing: .06em; padding-left: 26px; line-height: 1.15; min-height: 2.2em; }
 .hand-card .typeline { font-family: 'Special Elite', monospace; font-size: .55rem; letter-spacing: .2em; color: var(--brass); text-transform: uppercase; margin: .25rem 0 .35rem; }
 .hand-card .art {
   flex: 1; min-height: 50px;
@@ -925,8 +971,97 @@ section.screen.active { display: block; }
 }
 @media (max-width: 700px) {
   .card-grid { grid-template-columns: 1fr; }
-  #drydock { padding: 1rem; }
-  .title-frame { padding: 2rem 1.5rem; }
+  #drydock { padding: .8rem .7rem 3rem; }
+
+  /* Dock header — stack vertically, tighten typography */
+  .dock-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .25rem;
+    padding-bottom: .6rem;
+    margin-bottom: 1rem;
+  }
+  .dock-title { font-size: 1.2rem; letter-spacing: .15em; line-height: 1.1; }
+  .dock-sub { font-size: .65rem; letter-spacing: .15em; }
+  .dock-meta {
+    text-align: left;
+    font-size: .65rem;
+    letter-spacing: .1em;
+    display: flex; align-items: baseline; gap: .6rem;
+    margin-top: .25rem;
+  }
+  .dock-meta .bigcount { display: inline; font-size: 1.15rem; letter-spacing: .12em; white-space: nowrap; }
+  .dock-meta br { display: none; }
+
+  .panel { padding: .9rem .8rem; }
+  .panel-head { font-size: .8rem; flex-wrap: wrap; gap: .4rem; }
+  .filters { gap: .3rem; }
+  .chip { font-size: .6rem; padding: .3em .6em; }
+
+  /* Card pool — give the art more breathing room as a single column */
+  .card { min-height: 0; padding: .55rem; }
+  .card .art { min-height: 110px; }
+  .card .name { font-size: .9rem; }
+
+  /* Manifest list takes the full width below the pool */
+  .deck-list { max-height: 50vh; }
+  .curve { height: 56px; }
+  .launch-row { flex-wrap: wrap; }
+  .btn-launch { font-size: .9rem; }
+
+  /* ============ BATTLE ON PHONE ============ */
+  #battle { padding: .6rem .55rem; gap: .55rem; }
+  .zone { padding: .55rem .6rem; }
+  .bz-head { font-size: .65rem; letter-spacing: .15em; flex-wrap: wrap; gap: .3rem; }
+
+  /* Stack the battlefield row tighter */
+  .battlefield-row { gap: .55rem; }
+
+  .blimp-portrait { padding: .45rem; min-height: 100px; }
+  .blimp-portrait .name { font-size: .65rem; letter-spacing: .1em; }
+  .blimp-portrait .silhouette { font-size: 2.4rem; }
+  .blimp-portrait .hull { font-size: 1.1rem; }
+  .blimp-portrait .hull .label { font-size: .55rem; }
+  .pressure-pip { width: 8px; height: 8px; }
+
+  .crew-row { padding: .35rem; gap: .35rem; min-height: 100px; }
+
+  /* Mini cards on the board: smaller for phone */
+  .mini { width: 64px; min-height: 88px; padding: .25rem; }
+  .mini .nm { font-size: .55rem; }
+  .mini .pip { width: 18px; height: 18px; font-size: .65rem; }
+
+  /* Opponent face-down hand: shrink */
+  .opp-hand { padding: .25rem; gap: 4px; }
+  .opp-hand .card-back { width: 36px; height: 52px; }
+  .opp-hand .card-back::after { font-size: 1rem; }
+
+  /* Player hand zone */
+  .hand-zone { padding: .8rem .25rem 1rem; min-height: 0; gap: .35rem; }
+  .hand-card { width: 108px; min-height: 158px; padding: .35rem; }
+  .hand-card .nm { font-size: .62rem; padding-left: 22px; min-height: 2em; }
+  .hand-card .typeline { font-size: .5rem; margin: .15rem 0 .2rem; }
+  .hand-card .art { min-height: 38px; font-size: 1.4rem; }
+  .hand-card .tx { font-size: .52rem; min-height: 2.2em; line-height: 1.25; }
+  .hand-card .cost { width: 24px; height: 24px; font-size: .8rem; top: -8px; left: -8px; }
+  .hand-card .stat-pip { width: 20px; height: 20px; font-size: .7rem; }
+
+  /* Bottom controls reflow on phone */
+  .battle-controls { flex-wrap: wrap; gap: .5rem; justify-content: center; }
+  .you-bar { font-size: .65rem; letter-spacing: .1em; gap: .55rem; }
+  .turn-indicator { font-size: .7rem; letter-spacing: .15em; order: -1; flex-basis: 100%; text-align: center; }
+  .battle-controls > div:last-child { display: flex; gap: .35rem; flex-wrap: wrap; justify-content: center; }
+  #btn-end { font-size: .75rem; padding: .7em 1.2em; }
+
+  .log { max-height: 80px; font-size: .62rem; padding: .35rem .5rem; }
+
+  /* Aim banner shrink */
+  .aim-banner { font-size: .65rem; padding: .45em 1em; letter-spacing: .15em; max-width: 92vw; }
+
+  /* Victory overlay */
+  .veil-frame { padding: 1.8rem 1.5rem; }
+  .veil h2 { font-size: 2.6rem; }
+  .veil .epitaph { font-size: .8rem; }
 }
 
 /* scrollbar */
@@ -994,7 +1129,7 @@ section.screen.active { display: block; }
     </div>
     <div class="dock-meta">
       <span class="bigcount" id="dock-count">0 / 20</span>
-      Pressure curve below.<br>Max 2 copies of any card.
+      Pressure curve below.<br> Max 2 copies of any card.
     </div>
   </div>
   <div class="dock-grid">
