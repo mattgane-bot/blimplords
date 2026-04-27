@@ -101,15 +101,56 @@ section.screen.active { display: block; }
   display: none;
   flex-direction: column; align-items: center; justify-content: center;
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 3rem 2rem 0;
+  position: relative;
+  overflow: hidden;
 }
 #title.active { display: flex; }
+
+/* Panoramic painted backdrop — gunner art zoomed and drifting */
+.title-fleet {
+  position: absolute; inset: -5%;
+  background: url('blimplords-art/gunner.png') center/cover no-repeat;
+  filter: brightness(.34) saturate(.55) contrast(1.05) blur(1.5px);
+  z-index: 0;
+  animation: fleet-drift 38s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+@keyframes fleet-drift {
+  0%   { transform: scale(1.06) translate(-1.5%, -1%); }
+  100% { transform: scale(1.14) translate(2%, 1.5%); }
+}
+/* Vignette + fog so the title text reads cleanly */
+.title-fog {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 0%, #0e0e1099 55%, #0e0e10ee 90%),
+    linear-gradient(180deg, #0e0e10cc 0%, transparent 30%, transparent 60%, #0e0e10ee 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+/* Subtle SMOG-band drifting horizontally */
+.title-smog {
+  position: absolute; left: -20%; right: -20%; top: 35%; height: 30%;
+  background: radial-gradient(ellipse at center, #cfc7b218 0%, transparent 60%);
+  filter: blur(40px);
+  z-index: 1;
+  pointer-events: none;
+  animation: smog-drift 22s linear infinite alternate;
+}
+@keyframes smog-drift {
+  0%   { transform: translateX(-3%); }
+  100% { transform: translateX(3%); }
+}
+
 .title-frame {
   border: 1px solid var(--brass-dim);
-  padding: 4rem 5rem;
+  padding: 3rem 4.5rem 2.75rem;
   position: relative;
-  background: linear-gradient(180deg, #14110b 0%, #0a0907 100%);
-  box-shadow: inset 0 0 80px #000c, 0 0 60px #0008;
+  z-index: 3;
+  background: linear-gradient(180deg, #14110bee 0%, #0a0907ee 100%);
+  backdrop-filter: blur(4px);
+  box-shadow: inset 0 0 80px #000c, 0 0 60px #000a, 0 12px 40px #000c;
 }
 .title-frame::before, .title-frame::after {
   content: ''; position: absolute; left: 12px; right: 12px; height: 1px;
@@ -163,6 +204,138 @@ section.screen.active { display: block; }
   letter-spacing: .3em;
   color: var(--bone-dim);
   opacity: .6;
+}
+
+/* ============ TITLE — CARD FAN ============ */
+.title-fan {
+  position: absolute;
+  bottom: -90px;
+  left: 50%;
+  width: 800px;
+  height: 320px;
+  margin-left: -400px;
+  z-index: 2;
+  perspective: 1400px;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  transition: transform .6s cubic-bezier(.2, .8, .25, 1);
+}
+.t-slot {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 150px;
+  height: 220px;
+  margin-left: -75px;
+  transform-origin: 50% 110%;
+  transform: translate(var(--x), var(--y)) rotate(var(--r));
+  animation: deal .8s cubic-bezier(.2, .8, .25, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 0.13s + 0.4s);
+  pointer-events: auto;
+  cursor: default;
+  transition: transform .35s cubic-bezier(.2, .8, .25, 1), z-index 0s .35s;
+}
+.t-slot:hover {
+  z-index: 30;
+  transform: translate(var(--x), calc(var(--y) - 60px)) rotate(0deg) scale(1.12);
+  transition: transform .35s cubic-bezier(.2, .8, .25, 1), z-index 0s 0s;
+}
+@keyframes deal {
+  0% {
+    opacity: 0;
+    transform: translate(0, 380px) rotate(0deg) scale(.7);
+    filter: blur(8px);
+  }
+  60% { filter: blur(0); }
+  100% {
+    opacity: 1;
+    transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(1);
+    filter: blur(0);
+  }
+}
+.t-card-art {
+  width: 100%; height: 100%;
+  background: linear-gradient(180deg, #1c1814 0%, #0d0b08 100%);
+  background-size: cover; background-position: center top;
+  border: 1px solid var(--brass-dim);
+  box-shadow:
+    inset 0 0 0 1px #00000088,
+    inset 0 -50px 40px -20px #000c,
+    0 4px 8px #0008,
+    0 18px 40px #000c;
+  filter: contrast(1.05) saturate(.9) brightness(.92);
+  position: relative;
+  overflow: hidden;
+}
+/* Brass cog cost on each title card */
+.t-card-art::before {
+  content: attr(data-cost);
+  position: absolute; top: -10px; left: -10px;
+  width: 32px; height: 32px;
+  background: radial-gradient(circle at 35% 30%, #d8b76a 0%, #8a6a26 60%, #2a1f08 100%);
+  border: 1.5px solid #1a1308;
+  border-radius: 50%;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.05rem;
+  color: #1a1308;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px #b08d4c33, inset 0 -3px 6px #0006, 0 3px 5px #000a;
+  z-index: 4;
+}
+/* Card name banner on hover */
+.t-card-art::after {
+  content: attr(data-name);
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: .5em .6em;
+  font-family: 'Cinzel', serif;
+  letter-spacing: .12em;
+  font-size: .68rem;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--bone);
+  background: linear-gradient(180deg, transparent 0%, #000d 80%);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .25s, transform .25s;
+}
+.t-slot:hover .t-card-art::after { opacity: 1; transform: translateY(0); }
+.t-slot:hover .t-card-art {
+  border-color: var(--oxblood-bright);
+  box-shadow:
+    inset 0 0 0 1px #00000088,
+    inset 0 -50px 40px -20px #000c,
+    0 0 0 1px var(--oxblood-bright),
+    0 24px 48px #b6282844;
+  filter: contrast(1.05) saturate(1.05) brightness(1);
+}
+/* Drifting blimp silhouettes layer */
+.title-blimps {
+  position: absolute; inset: 0; z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.title-blimps span {
+  position: absolute;
+  font-size: 22px;
+  color: #0e0e10;
+  text-shadow: 0 0 16px #000a;
+  filter: drop-shadow(0 0 4px #0008);
+  opacity: .35;
+  animation: drift-by 60s linear infinite;
+}
+.title-blimps span:nth-child(1) { top: 18%; animation-duration: 80s; font-size: 28px; }
+.title-blimps span:nth-child(2) { top: 28%; animation-duration: 110s; animation-delay: -20s; font-size: 18px; }
+.title-blimps span:nth-child(3) { top: 12%; animation-duration: 140s; animation-delay: -60s; font-size: 14px; opacity: .25; }
+@keyframes drift-by {
+  0%   { left: -8%; }
+  100% { left: 108%; }
+}
+
+@media (max-width: 900px) {
+  .title-fan { width: 600px; margin-left: -300px; height: 240px; bottom: -120px; }
+  .t-slot { width: 110px; height: 160px; margin-left: -55px; }
+}
+@media (max-width: 600px) {
+  .title-fan { display: none; }
 }
 
 /* ============ DRYDOCK / DECK BUILDER ============ */
@@ -735,6 +908,13 @@ section.screen.active { display: block; }
 
 <!-- TITLE -->
 <section id="title" class="screen active">
+  <div class="title-fleet"></div>
+  <div class="title-fog"></div>
+  <div class="title-smog"></div>
+  <div class="title-blimps">
+    <span>🛩</span><span>🛸</span><span>🛩</span>
+  </div>
+
   <div class="title-frame">
     <div class="title-eyebrow">An Aetheric Concern</div>
     <h1 class="title-main">B<span class="lord-i">l</span>impl<span class="lord-i">o</span>rds</h1>
@@ -746,6 +926,30 @@ section.screen.active { display: block; }
     </p>
     <button id="btn-start" class="title-cta">Forge Your Fleet</button>
     <div class="title-foot">Vol. I &nbsp;·&nbsp; Drydock Edition &nbsp;·&nbsp; Schematic 0.1</div>
+  </div>
+
+  <!-- A hand of cards being dealt to the player at the title screen -->
+  <div class="title-fan" id="title-fan">
+    <div class="t-slot" style="--i:0; --x:-300px; --y:54px; --r:-18deg;">
+      <div class="t-card-art" data-cost="1" data-name="Bilge Stoker"
+           style="background-image:url('blimplords-art/bilge.png');"></div>
+    </div>
+    <div class="t-slot" style="--i:1; --x:-150px; --y:14px; --r:-9deg;">
+      <div class="t-card-art" data-cost="2" data-name="Deck Gunner"
+           style="background-image:url('blimplords-art/gunner.png');"></div>
+    </div>
+    <div class="t-slot" style="--i:2; --x:0px; --y:0px; --r:0deg;">
+      <div class="t-card-art" data-cost="3" data-name="Aether Saboteur"
+           style="background-image:url('blimplords-art/saboteur.png');"></div>
+    </div>
+    <div class="t-slot" style="--i:3; --x:150px; --y:14px; --r:9deg;">
+      <div class="t-card-art" data-cost="2" data-name="Powdered Aristocrat"
+           style="background-image:url('blimplords-art/aristocrat.png');"></div>
+    </div>
+    <div class="t-slot" style="--i:4; --x:300px; --y:54px; --r:18deg;">
+      <div class="t-card-art" data-cost="3" data-name="Bilge Brawler"
+           style="background-image:url('blimplords-art/brawler.png');"></div>
+    </div>
   </div>
 </section>
 
@@ -874,9 +1078,9 @@ const CARDS = [
   // CREW
   { id: 'stoker',        name: 'Bilge Stoker',        type: 'crew',  cost: 1, atk: 1, hp: 2, glyph: '🔧', art: 'blimplords-art/bilge.png',  text: 'Cheap conscript. Smells of coal-tar.' },
   { id: 'gunner',        name: 'Deck Gunner',         type: 'crew',  cost: 2, atk: 2, hp: 3, glyph: '🔫', art: 'blimplords-art/gunner.png', text: 'Steady aim, steadier morale.' },
-  { id: 'aristocrat',    name: 'Powdered Aristocrat', type: 'crew',  cost: 2, atk: 1, hp: 1, glyph: '🎩', text: 'On play: Draw a card. (Knows people.)' },
-  { id: 'brawler',       name: 'Bilge Brawler',       type: 'crew',  cost: 3, atk: 3, hp: 3, glyph: '🥊', text: 'Knuckle-dusters. No questions.' },
-  { id: 'saboteur',      name: 'Aether Saboteur',     type: 'crew',  cost: 3, atk: 2, hp: 4, glyph: '💣', text: 'On play: 1 damage to enemy blimp.' },
+  { id: 'aristocrat',    name: 'Powdered Aristocrat', type: 'crew',  cost: 2, atk: 1, hp: 1, glyph: '🎩', art: 'blimplords-art/aristocrat.png', text: 'On play: Draw a card. (Knows people.)' },
+  { id: 'brawler',       name: 'Bilge Brawler',       type: 'crew',  cost: 3, atk: 3, hp: 3, glyph: '🥊', art: 'blimplords-art/brawler.png',    text: 'Knuckle-dusters. No questions.' },
+  { id: 'saboteur',      name: 'Aether Saboteur',     type: 'crew',  cost: 3, atk: 2, hp: 4, glyph: '💣', art: 'blimplords-art/saboteur.png',   text: 'On play: 1 damage to enemy blimp.' },
   { id: 'captain',       name: 'Iron Captain',        type: 'crew',  cost: 4, atk: 4, hp: 5, glyph: '🎖', text: 'Hard-eyed and pitiless.' },
   // BLIMP PARTS (permanents)
   { id: 'hull',          name: 'Riveted Hull',        type: 'blimp', cost: 2, glyph: '🛡', text: 'Permanent. +5 max Hull.' },
@@ -1672,6 +1876,37 @@ function renderBattle() {
 
   // hand cap warning if needed could go here
 }
+
+// ============================================================
+//   TITLE — mouse parallax (subtle 3D tilt on fan + bg drift)
+// ============================================================
+(function attachTitleParallax() {
+  const fan = document.getElementById('title-fan');
+  const fleet = document.querySelector('.title-fleet');
+  if (!fan || !fleet) return;
+  let raf = 0, targetX = 0, targetY = 0, currX = 0, currY = 0;
+  document.getElementById('title').addEventListener('mousemove', (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    targetX = (e.clientX - r.left) / r.width - 0.5; // -0.5..0.5
+    targetY = (e.clientY - r.top) / r.height - 0.5;
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  document.getElementById('title').addEventListener('mouseleave', () => {
+    targetX = 0; targetY = 0;
+    if (!raf) raf = requestAnimationFrame(tick);
+  });
+  function tick() {
+    currX += (targetX - currX) * 0.08;
+    currY += (targetY - currY) * 0.08;
+    fan.style.transform = `rotateY(${currX * 7}deg) rotateX(${-currY * 5}deg)`;
+    fleet.style.transform = `scale(1.10) translate(${currX * -2}%, ${currY * -1.5}%)`;
+    if (Math.abs(targetX - currX) > 0.001 || Math.abs(targetY - currY) > 0.001) {
+      raf = requestAnimationFrame(tick);
+    } else {
+      raf = 0;
+    }
+  }
+})();
 
 // ============================================================
 //   INIT
